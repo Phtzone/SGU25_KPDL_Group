@@ -1,1 +1,0 @@
-# SGU25_KPDL_Group
