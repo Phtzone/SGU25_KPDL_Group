@@ -5,7 +5,8 @@
 
 
 ---- Bài tập nhóm môn Data Mining ----
-Giảng viên hướng dẫn: TS. Đỗ Như Tài
+
+Giảng viên hướng dẫn: @dntai TS. Đỗ Như Tài
 
 --------------------------------------
 
