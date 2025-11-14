@@ -1,4 +1,4 @@
-# iris_manual_knn.py
+
 import pandas as pd
 import random
 import math
