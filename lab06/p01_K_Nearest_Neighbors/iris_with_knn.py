@@ -3,6 +3,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from K_Nearest_Neighbors import K_Nearest_Neighbors as KNN
+from matplotlib.patches import Circle
 
 df = pd.read_csv("iris.csv")
 
@@ -136,5 +137,87 @@ print(f"\nFinal accuracy with k = {best_k}: {final_acc:.4f}")
 # Demo dự đoán điểm mới
 sample = [5.0, 3.4, 1.5, 0.2]
 pred_new = final_knn.predict(sample)
-print("\nPredict for new sample", sample, "->", pred_new,   
+print("\nPredict for new sample", sample, "->", pred_new,
       ", confidence =", final_knn.confidence)
+
+
+best_index = int(np.argmax(acc_values))
+best_k = k_values[best_index]
+best_acc = acc_values[best_index]
+print(f"\nBest k = {best_k}, accuracy = {best_acc:.4f}\n")
+
+# 5. VISUALIZE KNN LÂN CẬN CỦA 1 ĐIỂM TEST (giống hình minh họa KNN)
+
+# Chọn một điểm test (ví dụ điểm đầu tiên)
+query = X_test[0]
+query_label = y_test[0]
+
+# Tính khoảng cách 2D (Petal.Length, Petal.Width) từ query tới toàn bộ TRAIN
+# ix, iy đã khai báo ở trên: 2 = Petal.Length, 3 = Petal.Width
+dist_list = []  # (distance, x_train, y_train_label)
+for x_tr, y_tr in zip(X_train, y_train):
+    dx = x_tr[ix] - query[ix]
+    dy = x_tr[iy] - query[iy]
+    d = (dx**2 + dy**2) ** 0.5
+    dist_list.append((d, x_tr, y_tr))
+
+# Sắp xếp và lấy best_k láng giềng
+dist_list.sort(key=lambda t: t[0])
+neighbors = dist_list[:best_k]
+radius = neighbors[-1][0]  # bán kính = khoảng cách tới láng giềng thứ k
+
+print(f"Mô phỏng KNN quanh điểm test 0, true label = {query_label}")
+for i, (d, x_tr, y_tr) in enumerate(neighbors, start=1):
+    print(f"  Neighbor {i}: dist_2D = {d:.3f}, label = {y_tr}")
+
+# Vẽ scatter toàn bộ TRAIN theo lớp (2D) + điểm query + vòng tròn
+plt.figure()
+
+# toàn bộ điểm train
+X_train_np = np.array(X_train)
+y_train_np = np.array(y_train)
+for lab in sorted(set(y_train_np)):
+    mask = (y_train_np == lab)
+    plt.scatter(
+        X_train_np[mask, ix],
+        X_train_np[mask, iy],
+        label=lab,
+        alpha=0.7
+    )
+
+# highlight K láng giềng gần nhất (viền đậm hơn)
+for _, x_tr, y_tr in neighbors:
+    plt.scatter(
+        x_tr[ix],
+        x_tr[iy],
+        s=80,
+        facecolors='none',
+        edgecolors='black'
+    )
+
+# điểm query (điểm cần phân lớp)
+plt.scatter(
+    query[ix],
+    query[iy],
+    marker='x',
+    s=100
+)
+
+# vẽ vòng tròn bán kính = khoảng cách tới láng giềng thứ k
+circle = Circle(
+    (query[ix], query[iy]),
+    radius,
+    fill=False,
+    alpha=0.5
+)
+plt.gca().add_patch(circle)
+
+plt.xlabel(feat_names[ix])
+plt.ylabel(feat_names[iy])
+plt.title(f"KNN neighborhood (k={best_k}) for one test point")
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+# 5. TRAIN THE MODEL VỚI k TỐT NHẤT & ASSESS PERFORMANCE
+final_knn = KNN(train_data, k=best_k)
