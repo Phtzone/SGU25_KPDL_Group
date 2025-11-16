@@ -1,5 +1,5 @@
-# letter_with_knn.py
-# Câu 2: Nhận dạng ký tự dùng K Nearest Neighbors (dùng class KNN của thầy)
+
+# Câu 2: Nhận dạng ký tự dùng K Nearest Neighbors 
 # Database: UCI Letter Recognition
 # 26 lớp A..Z, 16-D feature vectors, 20 000 samples
 
