@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 import random
 import math
-
 # 1. Đọc dữ liệu
 # Mỗi dòng: label (A..Z), 16 đặc trưng số nguyên
 df = pd.read_csv("data2/letter-recognition.data", header=None)
@@ -68,7 +67,6 @@ def predict_one(x):
     return best_class, posteriors
 
 # 4. Đánh giá trên tập test
-
 correct = 0
 preds = []
 
