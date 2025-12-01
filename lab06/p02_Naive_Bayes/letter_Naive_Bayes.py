@@ -67,6 +67,7 @@ def predict_one(x):
     return best_class, posteriors
 
 # 4. Đánh giá trên tập test
+
 correct = 0
 preds = []
 
