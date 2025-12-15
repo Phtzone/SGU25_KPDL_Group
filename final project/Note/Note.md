@@ -7,3 +7,5 @@ Kết quả K-Means (k=4)
 1	Active Shoppers	Số KH: 2,094	(23.4%)	Mua sắm cao, hạn mức cao, VIP
 2	Low Activity Số KH: 1,408	(15.7%)	Hoạt động ít, số dư thấp, CẦN KÍCH HOẠT
 3	Installment Buyers	Số KH: 2,134	(23.8%)	Mua trả góp, thanh toán tốt, TRUNG THÀNH
+
+14/12 xử lý miss value với KNNImputer cho kết quả đánh tin hơn do dựa trên mối tương quan giữa nhiều biến khác
