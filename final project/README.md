@@ -26,8 +26,46 @@ Dự án hướng tới xây dựng một cách tiếp cận **dựa trên dữ 
 
 ---
 
-# sơ đồ quy trình của dự án
+## Câu hỏi nghiên cứu
+
+Trên cơ sở mục tiêu trên, nghiên cứu tập trung trả lời các câu hỏi:
+
+1. Làm thế nào để phân loại khách hàng dựa trên thói quen sử dụng thẻ (credit usage) và hành vi thanh toán (payment behavior), nhằm hỗ trợ tối ưu hóa các chiến dịch marketing?
+2. Đặc trưng hành vi nổi bật của từng cụm khách hàng là gì, và với mỗi cụm, chiến lược hành động phù hợp nhất đối với ngân hàng là gì?
+3. Có thể đề xuất các định hướng chuyển dịch khách hàng từ những nhóm có giá trị hiện tại thấp sang các nhóm khách hàng có giá trị cao hơn hay không, qua đó gia tăng doanh thu và mức độ gắn bó trong dài hạn?
+
+---
+
+## Tập dữ liệu
+
+- **Nguồn:** Bộ dữ liệu công khai `CC_GENERAL.csv`  
+  Kaggle: https://www.kaggle.com/datasets/arjunbhasin2013/ccdata
+- **Số lượng quan sát:** 8.950 khách hàng thẻ tín dụng đang hoạt động
+- **Số biến đặc trưng:** 18 biến số, tập trung vào:
+  - Số dư và biến động số dư (BALANCE, BALANCE_FREQUENCY)
+  - Giá trị và tần suất mua sắm (PURCHASES, ONEOFF_PURCHASES, INSTALLMENTS_PURCHASES, …)
+  - Giá trị và tần suất ứng tiền mặt (CASH_ADVANCE, CASH_ADVANCE_FREQUENCY)
+  - Hạn mức tín dụng (CREDIT_LIMIT)
+  - Khoản thanh toán, thanh toán tối thiểu, tỷ lệ thanh toán (PAYMENTS, MINIMUM_PAYMENTS, PRC_FULL_PAYMENT)
+  - Thời gian gắn bó với ngân hàng (TENURE)
+- **Cấp độ dữ liệu:** Mỗi dòng tương ứng với **một khách hàng**, được tổng hợp trong khoảng **6 tháng gần nhất**.
+
+---
+## sơ đồ quy trình của dự án
+
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/0959c324-3b26-4e6b-952b-67c1cabb0acf" />
+
+---
+
+## Kết quả tóm tắt
+
+Mô hình K-Means với **4 cụm** cho thấy sự khác biệt rõ rệt giữa các nhóm khách hàng về:
+
+- Mức độ chi tiêu và tần suất sử dụng thẻ  
+- Hành vi ứng tiền mặt và thanh toán dư nợ  
+- Mức độ tiềm ẩn rủi ro tín dụng  
+
+Từ đó, có thể gợi ý các hướng chiến lược như: ưu đãi giữ chân nhóm chi tiêu cao nhưng rủi ro thấp, chương trình kích hoạt lại cho nhóm ít hoạt động, và các biện pháp kiểm soát rủi ro cho nhóm sử dụng tín dụng căng thẳng.
 
 ---
 
