@@ -75,7 +75,7 @@ st.markdown('<div class="sub-header">Phân khúc khách hàng thẻ tín dụng 
 
 # Sidebar configuration
 with st.sidebar:
-    st.header("⚙️ Cấu hình")
+    st.header(" Cấu hình")
     
     artifact_path = st.text_input(
         "Đường dẫn model artifact (.joblib)",
@@ -92,7 +92,7 @@ with st.sidebar:
     
     st.divider()
     
-    st.subheader("ℹ️ Thông tin")
+    st.subheader("ℹ Thông tin")
     st.caption("Phiên bản: 1.0.0")
     st.caption("Ngày cập nhật: 2025-12-20")
 
@@ -108,16 +108,16 @@ try:
     model = load_model(artifact_path)
     cluster_names = model.get_cluster_names()
 except FileNotFoundError:
-    st.error(f"❌ Không tìm thấy file artifact tại: `{artifact_path}`")
-    st.info("💡 Hãy chạy notebook để export model trước khi sử dụng app này.")
+    st.error(f" Không tìm thấy file artifact tại: `{artifact_path}`")
+    st.info(" Hãy chạy notebook để export model trước khi sử dụng app này.")
     st.stop()
 except Exception as e:
-    st.error(f"❌ Không load được artifact: {e}")
+    st.error(f" Không load được artifact: {e}")
     st.stop()
 
 
 # Display model info
-with st.expander("📊 Thông tin Model", expanded=False):
+with st.expander(" Thông tin Model", expanded=False):
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Số cluster (K)", model.k)
@@ -138,7 +138,7 @@ with st.expander("📊 Thông tin Model", expanded=False):
 
 # Main section
 st.divider()
-st.header("📤 1. Upload dữ liệu")
+st.header(" 1. Upload dữ liệu")
 
 uploaded = st.file_uploader(
     "Chọn file CSV chứa dữ liệu khách hàng",
@@ -147,34 +147,34 @@ uploaded = st.file_uploader(
 )
 
 if uploaded is None:
-    st.info("💡 Hãy upload file CSV để bắt đầu phân khúc khách hàng.")
-    st.info("📁 Gợi ý: Sử dụng file `Dataset/CC GENERAL.csv` để test.")
+    st.info(" Hãy upload file CSV để bắt đầu phân khúc khách hàng.")
+    st.info(" Gợi ý: Sử dụng file `Dataset/CC GENERAL.csv` để test.")
     st.stop()
 
 # Read uploaded file
 raw_bytes = uploaded.read()
 try:
     df_in = pd.read_csv(io.BytesIO(raw_bytes))
-    st.success(f"✅ Đã load {len(df_in):,} khách hàng với {len(df_in.columns)} cột")
+    st.success(f" Đã load {len(df_in):,} khách hàng với {len(df_in.columns)} cột")
 except Exception as e:
-    st.error(f"❌ Không đọc được CSV: {e}")
+    st.error(f" Không đọc được CSV: {e}")
     st.stop()
 
 # Preview data
 if show_preview:
-    with st.expander("👁️ Preview dữ liệu (5 dòng đầu)", expanded=True):
+    with st.expander(" Preview dữ liệu (5 dòng đầu)", expanded=True):
         st.dataframe(df_in.head(), use_container_width=True)
 
 
 # Predict clusters
 st.divider()
-st.header("🎯 2. Kết quả phân khúc")
+st.header(" 2. Kết quả phân khúc")
 
 with st.spinner("Đang xử lý và phân khúc khách hàng..."):
     try:
         labels = model.predict(df_in)
     except Exception as e:
-        st.error(f"❌ Predict lỗi: {e}")
+        st.error(f" Predict lỗi: {e}")
         st.stop()
 
 # Prepare result dataframe
@@ -184,13 +184,13 @@ df_out["Cluster"] = labels.astype(int)
 if show_persona:
     df_out["Persona"] = df_out["Cluster"].map(cluster_names)
 
-st.success("✅ Hoàn thành phân khúc!")
+st.success(" Hoàn thành phân khúc!")
 
 # Display results with enhanced visualizations
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.subheader("📊 Phân phối Cluster")
+    st.subheader(" Phân phối Cluster")
     
     # Prepare data
     if show_persona:
@@ -230,7 +230,7 @@ with col1:
         st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    st.subheader("📋 Kết quả mẫu (10 dòng)")
+    st.subheader(" Kết quả mẫu (10 dòng)")
     
     # Select columns to display
     display_cols = ["Cluster"]
@@ -255,10 +255,10 @@ with col2:
 
 # Statistics with enhanced visualizations
 st.divider()
-st.header("📈 3. Phân tích trực quan")
+st.header(" 3. Phân tích trực quan")
 
 # Summary table
-st.subheader("📊 Thống kê tổng quan")
+st.subheader(" Thống kê tổng quan")
 
 if show_persona:
     summary = df_out.groupby(["Cluster", "Persona"]).size().reset_index(name="Số KH")
@@ -273,7 +273,7 @@ st.dataframe(summary, use_container_width=True, hide_index=True)
 # Profile comparison charts
 numeric_cols = df_in.select_dtypes(include=['number']).columns.tolist()
 if numeric_cols:
-    st.subheader("📊 So sánh Profile giữa các Cluster")
+    st.subheader(" So sánh Profile giữa các Cluster")
     
     # Select top metrics to visualize
     available_metrics = [c for c in ["BALANCE", "PURCHASES", "CREDIT_LIMIT", "PAYMENTS", "CASH_ADVANCE"] if c in numeric_cols]
@@ -312,7 +312,7 @@ if numeric_cols:
         st.plotly_chart(fig, use_container_width=True)
         
         # Heatmap for cluster profiles
-        st.subheader("🔥 Heatmap Profile Cluster")
+        st.subheader(" Heatmap Profile Cluster")
         
         heatmap_data = df_out.groupby("Cluster")[available_metrics[:6]].mean()
         
@@ -341,13 +341,13 @@ if numeric_cols:
 
 # Download section
 st.divider()
-st.header("💾 4. Download kết quả")
+st.header(" 4. Download kết quả")
 
 csv_bytes = df_out.to_csv(index=False).encode("utf-8-sig")
 filename = "segmented_customers_with_persona.csv" if show_persona else "segmented_customers.csv"
 
 st.download_button(
-    label=f"📥 Download CSV {'(kèm Persona)' if show_persona else '(kèm cột Cluster)'}",
+    label=f" Download CSV {'(kèm Persona)' if show_persona else '(kèm cột Cluster)'}",
     data=csv_bytes,
     file_name=filename,
     mime="text/csv",
@@ -358,12 +358,12 @@ st.download_button(
 # Marketing strategy section
 if show_marketing:
     st.divider()
-    st.header("🎯 5. Chiến lược Marketing theo Persona")
+    st.header(" 5. Chiến lược Marketing theo Persona")
     
     # Mapping persona keywords to marketing strategies
     campaign_map = {
         "Cash-Advance Heavy": {
-            "icon": "⚠️",
+            "icon": "",
             "title": "Kiểm soát rủi ro",
             "strategies": [
                 "Giảm hạn mức ứng tiền mặt",
@@ -373,7 +373,7 @@ if show_marketing:
             ]
         },
         "Low Activity": {
-            "icon": "🎯",
+            "icon": "",
             "title": "Kích hoạt khách hàng",
             "strategies": [
                 "Welcome back campaign với ưu đãi hấp dẫn",
@@ -383,7 +383,7 @@ if show_marketing:
             ]
         },
         "VIP": {
-            "icon": "👑",
+            "icon": "",
             "title": "Chăm sóc VIP",
             "strategies": [
                 "Tăng hạn mức tín dụng không cần yêu cầu",
@@ -393,7 +393,7 @@ if show_marketing:
             ]
         },
         "Installment": {
-            "icon": "🛍️",
+            "icon": "",
             "title": "Thúc đẩy trả góp",
             "strategies": [
                 "Partnership với BNPL platforms",
@@ -403,7 +403,7 @@ if show_marketing:
             ]
         },
         "Revolver": {
-            "icon": "💳",
+            "icon": "",
             "title": "Quản lý nợ",
             "strategies": [
                 "Balance transfer với lãi suất ưu đãi",
@@ -413,7 +413,7 @@ if show_marketing:
             ]
         },
         "Regular": {
-            "icon": "🔄",
+            "icon": "",
             "title": "Duy trì và phát triển",
             "strategies": [
                 "Chương trình tích điểm ổn định",
@@ -439,7 +439,7 @@ if show_marketing:
         # Default strategy if no match
         if strategy_info is None:
             strategy_info = {
-                "icon": "📊",
+                "icon": "",
                 "title": "Theo dõi và đánh giá",
                 "strategies": ["Phân tích hành vi chi tiêu", "Thiết kế chiến dịch phù hợp"]
             }
