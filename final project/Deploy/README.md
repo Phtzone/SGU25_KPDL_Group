@@ -81,10 +81,10 @@ App sẽ mở tại: **http://localhost:8501**
 
 1. Push code lên GitHub repository
 2. Đảm bảo có các file:
-   - `Deploy/segmentation_model.py`
-   - `Deploy/streamlit_app/app.py`
-   - `Deploy/requirements.txt`
-   - `Deploy/model_artifacts/credit_segmentation_k4.joblib`
+   - `final project/Deploy/segmentation_model.py`
+   - `final project/Deploy/streamlit_app/app.py`
+   - `final project/Deploy/model_artifacts/credit_segmentation_k4.joblib`
+   - **`requirements.txt`** (ở repo root - quan trọng!)
 
 ### Deploy
 
