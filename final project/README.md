@@ -10,3 +10,6 @@
 - Nguyễn Thái Tú - 3123580058
 
 ## GIỚI THIỆU
+
+# sơ đồ quy trình của dự án
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/0959c324-3b26-4e6b-952b-67c1cabb0acf" />
