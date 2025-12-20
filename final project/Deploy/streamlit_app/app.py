@@ -18,7 +18,12 @@ import io
 import sys
 
 import pandas as pd
+import numpy as np
 import streamlit as st
+import plotly.express as px
+import plotly.graph_objects as go
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Add parent directory to path for imports
 APP_DIR = Path(__file__).resolve().parent
@@ -181,23 +186,48 @@ if show_persona:
 
 st.success("✅ Hoàn thành phân khúc!")
 
-# Display results
+# Display results with enhanced visualizations
 col1, col2 = st.columns([1, 1])
 
 with col1:
     st.subheader("📊 Phân phối Cluster")
     
+    # Prepare data
     if show_persona:
-        # Count by persona
         persona_counts = df_out.groupby(["Cluster", "Persona"]).size().reset_index(name="Count")
+        persona_counts["Percentage"] = (persona_counts["Count"] / len(df_out) * 100).round(1)
         persona_counts["Label"] = persona_counts.apply(
-            lambda row: f"C{row['Cluster']}: {row['Persona'][:35]}", axis=1
+            lambda row: f"C{row['Cluster']}: {row['Persona'][:30]}", axis=1
         )
-        chart_data = persona_counts.set_index("Label")["Count"]
+        
+        # Pie chart with Plotly
+        fig = px.pie(
+            persona_counts, 
+            values='Count', 
+            names='Label',
+            title='Phân bổ khách hàng theo Persona',
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
+        fig.update_traces(textposition='inside', textinfo='percent+label')
+        fig.update_layout(height=400, showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
     else:
-        chart_data = df_out["Cluster"].value_counts().sort_index()
-    
-    st.bar_chart(chart_data, height=350)
+        cluster_counts = df_out["Cluster"].value_counts().sort_index().reset_index()
+        cluster_counts.columns = ["Cluster", "Count"]
+        cluster_counts["Percentage"] = (cluster_counts["Count"] / len(df_out) * 100).round(1)
+        
+        fig = px.bar(
+            cluster_counts,
+            x="Cluster",
+            y="Count",
+            text="Percentage",
+            title="Số lượng khách hàng theo Cluster",
+            color="Count",
+            color_continuous_scale="Blues"
+        )
+        fig.update_traces(texttemplate='%{text}%', textposition='outside')
+        fig.update_layout(height=400)
+        st.plotly_chart(fig, use_container_width=True)
 
 with col2:
     st.subheader("📋 Kết quả mẫu (10 dòng)")
@@ -223,9 +253,12 @@ with col2:
         hide_index=True
     )
 
-# Statistics
+# Statistics with enhanced visualizations
 st.divider()
-st.subheader("📈 Thống kê chi tiết")
+st.header("📈 3. Phân tích trực quan")
+
+# Summary table
+st.subheader("📊 Thống kê tổng quan")
 
 if show_persona:
     summary = df_out.groupby(["Cluster", "Persona"]).size().reset_index(name="Số KH")
@@ -237,10 +270,78 @@ else:
 
 st.dataframe(summary, use_container_width=True, hide_index=True)
 
+# Profile comparison charts
+numeric_cols = df_in.select_dtypes(include=['number']).columns.tolist()
+if numeric_cols:
+    st.subheader("📊 So sánh Profile giữa các Cluster")
+    
+    # Select top metrics to visualize
+    available_metrics = [c for c in ["BALANCE", "PURCHASES", "CREDIT_LIMIT", "PAYMENTS", "CASH_ADVANCE"] if c in numeric_cols]
+    
+    if not available_metrics:
+        available_metrics = numeric_cols[:5]
+    
+    if available_metrics:
+        # Create comparison dataframe
+        comparison_data = []
+        for cluster_id in sorted(df_out["Cluster"].unique()):
+            cluster_data = df_out[df_out["Cluster"] == cluster_id][available_metrics].mean()
+            persona_name = cluster_names.get(cluster_id, f"Cluster {cluster_id}") if show_persona else f"Cluster {cluster_id}"
+            
+            for metric in available_metrics[:5]:  # Top 5 metrics
+                comparison_data.append({
+                    "Cluster": f"C{cluster_id}: {persona_name[:20]}" if show_persona else f"Cluster {cluster_id}",
+                    "Metric": metric,
+                    "Value": cluster_data[metric]
+                })
+        
+        comp_df = pd.DataFrame(comparison_data)
+        
+        # Grouped bar chart
+        fig = px.bar(
+            comp_df,
+            x="Metric",
+            y="Value",
+            color="Cluster",
+            barmode="group",
+            title="So sánh trung bình các chỉ số chính giữa các Cluster",
+            labels={"Value": "Giá trị trung bình", "Metric": "Chỉ số"},
+            color_discrete_sequence=px.colors.qualitative.Set2
+        )
+        fig.update_layout(height=450, xaxis_tickangle=-45)
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Heatmap for cluster profiles
+        st.subheader("🔥 Heatmap Profile Cluster")
+        
+        heatmap_data = df_out.groupby("Cluster")[available_metrics[:6]].mean()
+        
+        # Normalize for better visualization
+        heatmap_normalized = (heatmap_data - heatmap_data.min()) / (heatmap_data.max() - heatmap_data.min())
+        
+        fig = go.Figure(data=go.Heatmap(
+            z=heatmap_normalized.values,
+            x=heatmap_normalized.columns,
+            y=[f"Cluster {i}" for i in heatmap_normalized.index],
+            colorscale="RdYlGn",
+            text=heatmap_data.round(1).values,
+            texttemplate="%{text}",
+            textfont={"size": 10},
+            colorbar=dict(title="Normalized")
+        ))
+        
+        fig.update_layout(
+            title="Cluster Profile Heatmap (Normalized)",
+            xaxis_title="Metrics",
+            yaxis_title="Cluster",
+            height=300
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
 
 # Download section
 st.divider()
-st.header("💾 3. Download kết quả")
+st.header("💾 4. Download kết quả")
 
 csv_bytes = df_out.to_csv(index=False).encode("utf-8-sig")
 filename = "segmented_customers_with_persona.csv" if show_persona else "segmented_customers.csv"
@@ -257,7 +358,7 @@ st.download_button(
 # Marketing strategy section
 if show_marketing:
     st.divider()
-    st.header("🎯 4. Chiến lược Marketing theo Persona")
+    st.header("🎯 5. Chiến lược Marketing theo Persona")
     
     # Mapping persona keywords to marketing strategies
     campaign_map = {
@@ -353,7 +454,7 @@ if show_marketing:
             for strategy in strategy_info['strategies']:
                 st.markdown(f"- {strategy}")
             
-            # Show profile stats if available
+            # Show profile stats with mini chart
             numeric_cols = df_in.select_dtypes(include=['number']).columns.tolist()
             if numeric_cols:
                 st.markdown("---")
@@ -361,11 +462,24 @@ if show_marketing:
                 
                 cluster_data = df_out[df_out["Cluster"] == cluster_id][numeric_cols[:5]]
                 if len(cluster_data) > 0:
-                    stats_df = pd.DataFrame({
-                        "Metric": cluster_data.columns,
-                        "Mean": cluster_data.mean().round(2).values
-                    })
-                    st.dataframe(stats_df, use_container_width=True, hide_index=True)
+                    means = cluster_data.mean().round(2)
+                    
+                    # Mini bar chart
+                    fig = go.Figure(data=[
+                        go.Bar(
+                            x=means.values,
+                            y=means.index,
+                            orientation='h',
+                            marker=dict(color='#2E86C1')
+                        )
+                    ])
+                    fig.update_layout(
+                        height=200,
+                        margin=dict(l=0, r=0, t=0, b=0),
+                        xaxis_title="Value",
+                        yaxis_title="Metric"
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
 
 
 # Footer
